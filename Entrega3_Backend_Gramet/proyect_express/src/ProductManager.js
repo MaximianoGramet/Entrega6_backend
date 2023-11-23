@@ -88,4 +88,4 @@ export class Product {
     }
 }
 
-export default ProductManager
+export {ProductManager,Product}
