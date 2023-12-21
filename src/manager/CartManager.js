@@ -1,4 +1,3 @@
-import { error } from "console";
 import fs from "fs"
 
 
@@ -51,7 +50,7 @@ export class CartManager{
     getCartID(cid){
         const product = this.listOfCarts.find(element=>element.id==cid)
         if(!product){
-            throw new error("Cart not found")
+            throw new Error("Cart not found")
         }
         return product
     }

@@ -18,9 +18,9 @@ class CartDao {
   }
 
   async deleteCart(_id) {
-    await postModel.deleteMany({ author: _id });
+    await CartModel.deleteMany({ author: _id });
 
-    return await userModel.findByIdAndDelete({ _id });
+    return await CartModel.findByIdAndDelete({ _id });
   }
 }
 

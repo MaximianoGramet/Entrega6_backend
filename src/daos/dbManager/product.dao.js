@@ -16,6 +16,10 @@ class ProductDao {
   async deleteProduct(_id) {
     return await postModel.findByIdAndDelete({ _id });
   }
+
+  async getProductById(_id) {
+    return await postModel.findById(_id);
+  }
 }
 
 export default new ProductDao;

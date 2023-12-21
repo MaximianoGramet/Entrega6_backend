@@ -1,30 +1,50 @@
 import { Router } from "express";
-import { ProductManager,Product } from "../manager/ProductManager.js";
+import ProductDao from "../daos/dbManager/product.dao.js";
 
 const ROUTER = Router();
-const ProManager = new ProductManager("./src/manager/Products.json")
 
-ROUTER.get("/",(req,res)=>{
-    const {limit} = req.query
 
-    const products = ProManager.getProducts()
 
-    if(limit){
-        const OptionsLimit = products.slice(0,limit)
-        return res.json(OptionsLimit)
-    }
-    return res.json(products)
-})
+ROUTER.get("/",async (req,res)=>{
 
-ROUTER.get("/:id",(req,res)=>{
-    const {id} =req.params
     try{
-        const ResgetProductById = ProManager.getProductById(Number(id));
-        return res.json(ResgetProductById)
-    }catch(error){
-        return res.status(404).json({error:error.message})
-    }
+        const products = await ProductDao.findProduct();
+        res.json({
+          data: products,
+          message: "Products List"
+        });
+      }catch(error){
+        console.log(error);
+        res.json({
+          error,
+          message: "Error",
+        });
+      }
 })
+
+ROUTER.get("/:id", async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const product = await ProductDao.getProductById(id);
+  
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+  
+      res.json({
+        product,
+        message: "Product found",
+      });
+    } catch (error) {
+      console.log(error);
+      res.json({
+        error,
+        message: "Error",
+      });
+    }
+  });
+
 
 ROUTER.delete("/:id",(req,res)=>{
     const {id} = req.params
@@ -38,35 +58,58 @@ ROUTER.delete("/:id",(req,res)=>{
 })
 
 ROUTER.post("/", async (req,res)=>{
-    try{
-        const { title, description, code, price, stock, category,thumbnail } = req.body;
-        const status = true;
-        const product = new Product(code, title, description, price,status,thumbnail, stock,category);
-        if (   title == null
-            || description == null
-            || code == null
-            || price == null
-            || stock == null
-            || category == null){
-            return res.status(400).json({message:"Missing mandatory field"})
-        }
-        await ProManager.addProduct(product)
-        return res.status(200).json({message:"Product created successfully"})
-    }catch(error){
-        return res.status(500).json({message:error.message})
+    try { 
+        const product = await ProductDao.createProducts(req.body);
+        res.json({
+            product,
+            message: "Product created"
+        });
+    }
+    catch (error) {
+        console.log(error);
+        res.json({
+            error,
+            message: "error"
+        });
     }
 })
 
 ROUTER.put("/:pid",async (req,res)=>{
-    try{
-        const {pid} = req.params
-        const {code, title, description, price,status,thumbnail, stock,category} = req.body;
-        const product = new Product(code, title, description, price,status,thumbnail, stock,category);
-        await ProManager.editProduct(pid,product)
-        return res.status(200).json({message:"Product updated successfully"})
-    }catch(error){
-        return res.status(500).json({message:error.message})
+    try {
+        const { id } = req.params;
+        const product = await ProductDao.updateProducts(id, req.body);
+
+        res.json({
+            product,
+            message: "Product updated"
+        });
+    }
+    catch (error){
+        console.log(error);
+        res.json({
+            error,
+            message: "error"
+        });
     }
 })
+
+router.delete("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const product = await ProductDao.deleteProducts(id);
+
+        res.json({
+            product,
+            message: "Product deleted"
+        });
+    }
+    catch (error){
+        console.log(error);
+        res.json({
+            error,
+            message: "error"
+        });
+    }
+});
 
 export default ROUTER
