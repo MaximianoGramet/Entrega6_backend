@@ -93,7 +93,7 @@ ROUTER.put("/:pid",async (req,res)=>{
     }
 })
 
-router.delete("/:id", async (req, res) => {
+ROUTER.delete("/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const product = await ProductDao.deleteProducts(id);

@@ -7,6 +7,8 @@ import handlebars from "express-handlebars";
 import __dirname from "./utils.js";
 import { ProductManager,Product } from "./manager/ProductManager.js";
 import mongoose from "mongoose";
+import messageDao from "./daos/dbManager/message.dao.js";
+
 
 const Host = express();
 const PORT= 8080;
