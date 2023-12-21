@@ -1,42 +1,107 @@
-import { Router, json } from "express";
-import { CartManager,Cart } from "../manager/CartManager.js";
+import { Router } from "express";
+import cartDao from "../daos/dbManager/cart.dao.js";
 
-const ROUTER = Router()
-const CaManager = new CartManager("./src/manager/Carts.json");
+const router = Router();
 
-ROUTER.get("/",(req,res)=>{
-    const GetCart = CaManager.getCarts()
-
-    return res.json(GetCart)
-})
-
-ROUTER.get("/:cid",(req,res)=>{
-    const {cid} = req.params
-    try{
-        const CartRes = CaManager.getCartID(cid)
-        return res.status(200).json(CartRes)
-    }catch(error){
-        return res.status(404).json({error:error.message})
+router.get("/", async (req, res) => {
+    try {
+        const carts = await cartDao.findCart();
+        res.json({
+            data: carts,
+            message: "Carts list"
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            error,
+            message: "Error"
+        });
     }
-})
+});
 
-ROUTER.post("/",(req,res)=>{
-    try{
-        CaManager.AddCart()
-        res.json("Cart Created")
-    }catch{
-        res.json("Error creating the cart")
+router.get("/:cid", async (req, res) => {
+    const { cid } = req.params;
+    try {
+        const cart = await cartDao.findById(cid);
+
+        if (!cart) {
+            return res.status(404).json({ message: "Cart not found" });
+        }
+
+        res.json({
+            cart,
+            message: "Cart found",
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            error,
+            message: "Error",
+        });
     }
-})
+});
 
-ROUTER.post("/:cid/product/:pid", async(req,res)=>{
-    const {cid,pid}= req.params
-    try{
-        await CaManager.AddToCart(cid,pid)
-        return res.json({message:"Product added to the cart"})
-    }catch(error){
-        return res.json({error:error.message})
+router.post("/", async (req, res) => {
+    try {
+        const cart = await cartDao.createCart(req.body);
+        res.json({
+            cart,
+            message: "Cart created"
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            error,
+            message: "Error"
+        });
     }
-})
+});
 
-export default ROUTER
+router.put("/:cid", async (req, res) => {
+    const { cid } = req.params;
+    try {
+        const cart = await cartDao.updateCart(cid, req.body);
+        res.json({
+            cart,
+            message: "Cart updated"
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            error,
+            message: "Error"
+        });
+    }
+});
+
+router.delete("/:cid", async (req, res) => {
+    const { cid } = req.params;
+    try {
+        const cart = await cartDao.deleteCart(cid);
+        res.json({
+            cart,
+            message: "Cart deleted"
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            error,
+            message: "Error"
+        });
+    }
+});
+
+router.post("/:cid/product/:pid", async (req, res) => {
+    const { cid, pid } = req.params;
+    try {
+        const result = await cartDao.addProductCart(cid, pid);
+        res.json({
+            result,
+            message: "Product added"
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+export default router;
